@@ -14,6 +14,7 @@
 		DF8DEF1D1B5A7CD6003F28DB /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DF8DEF1C1B5A7CD6003F28DB /* Images.xcassets */; };
 		DF8DEF201B5A7CD6003F28DB /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = DF8DEF1E1B5A7CD6003F28DB /* LaunchScreen.xib */; };
 		DF8DEF2C1B5A7CD6003F28DB /* XPQScrollLabelTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DF8DEF2B1B5A7CD6003F28DB /* XPQScrollLabelTests.m */; };
+		DF8DEF371B5A7CEE003F28DB /* XPQScrollLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = DF8DEF361B5A7CEE003F28DB /* XPQScrollLabel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,8 @@
 		DF8DEF251B5A7CD6003F28DB /* XPQScrollLabelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XPQScrollLabelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF8DEF2A1B5A7CD6003F28DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DF8DEF2B1B5A7CD6003F28DB /* XPQScrollLabelTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XPQScrollLabelTests.m; sourceTree = "<group>"; };
+		DF8DEF351B5A7CEE003F28DB /* XPQScrollLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XPQScrollLabel.h; sourceTree = "<group>"; };
+		DF8DEF361B5A7CEE003F28DB /* XPQScrollLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XPQScrollLabel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +92,8 @@
 				DF8DEF1C1B5A7CD6003F28DB /* Images.xcassets */,
 				DF8DEF1E1B5A7CD6003F28DB /* LaunchScreen.xib */,
 				DF8DEF0F1B5A7CD6003F28DB /* Supporting Files */,
+				DF8DEF351B5A7CEE003F28DB /* XPQScrollLabel.h */,
+				DF8DEF361B5A7CEE003F28DB /* XPQScrollLabel.m */,
 			);
 			path = XPQScrollLabel;
 			sourceTree = "<group>";
@@ -222,6 +227,7 @@
 				DF8DEF181B5A7CD6003F28DB /* ViewController.m in Sources */,
 				DF8DEF151B5A7CD6003F28DB /* AppDelegate.m in Sources */,
 				DF8DEF121B5A7CD6003F28DB /* main.m in Sources */,
+				DF8DEF371B5A7CEE003F28DB /* XPQScrollLabel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

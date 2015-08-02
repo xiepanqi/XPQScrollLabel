@@ -7,8 +7,10 @@
 //
 
 #import "ViewController.h"
+#import "XPQScrollLabel.h"
 
 @interface ViewController ()
+@property (weak, nonatomic) IBOutlet XPQScrollLabel *testLabel;
 
 @end
 
@@ -23,5 +25,11 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+- (IBAction)clickTest:(id)sender {
+    [self.testLabel startAnimation];
+}
 
+- (IBAction)clickStop:(id)sender {
+    [self.testLabel stopAnimation];
+}
 @end
