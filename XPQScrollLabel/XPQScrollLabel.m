@@ -11,9 +11,21 @@
 #import "XPQScrollLabel.h"
 
 @interface XPQScrollLabel () {
+    /**
+     *  @brief  滚动动画暂停时时间
+     */
     CFTimeInterval _pausedTime;
+    /**
+     *  @brief  YES-在向右滚动，NO-在向左滚动
+     */
     BOOL _isRight;
+    /**
+     *  @brief  当文本滚动到最左侧时的位置和大小
+     */
     CGRect _leftRect;
+    /**
+     *  @brief  当文本滚动到最右侧时的位置和大小
+     */
     CGRect _rightRect;
 }
 @property (nonatomic, weak) UILabel *label;
@@ -146,6 +158,9 @@
     self.layer.beginTime = timeSincePause;
 }
 
+/**
+ *  @brief  动画结束时触发，在这里再次启动动画，让动画一直循环下去
+ */
 -(void)animationDidStop {
     _isRight = !_isRight;
     [self startAnimation];
@@ -302,5 +317,13 @@
 
 -(void)setPreferredMaxLayoutWidth:(CGFloat)preferredMaxLayoutWidth {
     _label.preferredMaxLayoutWidth = preferredMaxLayoutWidth;
+}
+
+#pragma mark -UILabel函数
+- (CGRect)textRectForBounds:(CGRect)bounds limitedToNumberOfLines:(NSInteger)numberOfLines {
+    return [_label textRectForBounds:bounds limitedToNumberOfLines:numberOfLines];
+}
+- (void)drawTextInRect:(CGRect)rect {
+    [_label drawTextInRect:rect];
 }
 @end
