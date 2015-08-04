@@ -10,6 +10,8 @@
 
 #import "XPQScrollLabel.h"
 
+#define kAnimationKey       @"scrollAnimation"
+
 @interface XPQScrollLabel () {
     /**
      *  @brief  滚动动画暂停时时间
@@ -19,16 +21,16 @@
      *  @brief  YES-在向右滚动，NO-在向左滚动
      */
     BOOL _isRight;
-    /**
-     *  @brief  当文本滚动到最左侧时的位置和大小
-     */
-    CGRect _leftRect;
-    /**
-     *  @brief  当文本滚动到最右侧时的位置和大小
-     */
-    CGRect _rightRect;
 }
 @property (nonatomic, weak) UILabel *label;
+/**
+ *  @brief  左滚动画
+ */
+@property (nonatomic) CABasicAnimation *leftScrollAnimation;
+/**
+ *  @brief  右滚动画
+ */
+@property (nonatomic) CABasicAnimation *rightScrollAnimation;
 @end
 
 @implementation XPQScrollLabel
@@ -45,6 +47,10 @@
     _time = time;
     if (time <= 0.01) {
         self.type = XPQScrollLabelTypeBan;
+    }
+    else {
+        self.leftScrollAnimation.duration = time;
+        self.rightScrollAnimation.duration = time;
     }
 }
 
@@ -109,12 +115,31 @@
  */
 -(void)calcLabelFrame {
     [self.label sizeToFit];
-    _leftRect = CGRectMake(0, (self.frame.size.height - self.label.frame.size.height) / 2, self.label.frame.size.width + 10, self.label.frame.size.height);
-    _rightRect = CGRectOffset(_leftRect, self.frame.size.width - _leftRect.size.width, 0);
-    self.label.frame = _leftRect;
+    self.label.frame = CGRectMake(0, (self.frame.size.height - self.label.frame.size.height) / 2, self.label.frame.size.width + 10, self.label.frame.size.height);
+    self.leftScrollAnimation = [self creadAnimation:YES];
+    self.rightScrollAnimation = [self creadAnimation:NO];
 }
 
 #pragma mark - 动画
+/**
+ *  @brief  创建左右滚动动画
+ *  @param isRight 是向右滚动不
+ *  @return 创建好的滚动动画
+ */
+-(CABasicAnimation *)creadAnimation:(BOOL)isRight {
+    // 靠最左边时的中心点
+    NSValue *leftValue = [NSValue valueWithCGPoint:self.label.center];
+    // 靠最右边时的中心店
+    NSValue *rightValue = [NSValue valueWithCGPoint:CGPointMake(self.label.center.x + (self.frame.size.width - self.label.frame.size.width), self.label.center.y)];
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.fromValue = isRight ? leftValue : rightValue;
+    animation.toValue = isRight ? rightValue : leftValue;
+    animation.duration = self.time;
+    animation.timingFunction = [CAMediaTimingFunction functionWithName: kCAMediaTimingFunctionEaseInEaseOut];
+    animation.delegate = self;
+    return animation;
+}
+
 /**
  *  @brief  启动动画
  */
@@ -123,19 +148,14 @@
         return;
     }
     
-    [UIView beginAnimations:@"scroll" context:NULL];
-    [UIView setAnimationDuration:self.time];
-    [UIView setAnimationDelegate:self];
-    [UIView setAnimationDidStopSelector:@selector(animationDidStop)];
-    self.label.frame = _isRight ? _rightRect : _leftRect;
-    [UIView commitAnimations];
+    [self.label.layer addAnimation:_isRight ? self.rightScrollAnimation : self.leftScrollAnimation forKey:kAnimationKey];
 }
 
 /**
  *  @brief  停止动画
  */
 -(void)stopAnimation {
-    [self.label.layer removeAllAnimations];
+    [self.label.layer removeAnimationForKey:kAnimationKey];
 }
 
 /**
@@ -161,9 +181,11 @@
 /**
  *  @brief  动画结束时触发，在这里再次启动动画，让动画一直循环下去
  */
--(void)animationDidStop {
-    _isRight = !_isRight;
-    [self startAnimation];
+-(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+    if (flag) {
+        _isRight = !_isRight;
+        [self startAnimation];
+    }
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
