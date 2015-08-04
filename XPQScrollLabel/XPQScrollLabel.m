@@ -40,6 +40,7 @@
     super.bounds = bounds;
     if (_label) {
         [self calcLabelFrame];
+        [self startAnimation];
     }
 }
 
@@ -51,6 +52,7 @@
     else {
         self.leftScrollAnimation.duration = time;
         self.rightScrollAnimation.duration = time;
+        [self startAnimation];
     }
 }
 
@@ -58,7 +60,7 @@
     _type = type;
     switch (type) {
         case XPQScrollLabelTypeRepeat:
-            
+            [self startAnimation];
             break;
             
         case XPQScrollLabelTypeClick:
@@ -144,7 +146,10 @@
  *  @brief  启动动画
  */
 -(void)startAnimation {
-    if (self.time < 0.1 || self.type == XPQScrollLabelTypeBan) {
+    if (self.time < 0.1
+        || self.type == XPQScrollLabelTypeBan
+        || self.leftScrollAnimation == nil
+        || self.rightScrollAnimation == nil) {
         return;
     }
     
@@ -207,7 +212,7 @@
     UITouch *touch = touches.anyObject;
     CGFloat x1 = [touch locationInView:self].x;
     CGFloat x2 = [touch previousLocationInView:self].x;
-    _pausedTime += (_isRight ? x2 - x1 : x1 - x2) / (self.label.bounds.size.width - self.bounds.size.width);
+    _pausedTime += (_isRight ? x1 - x2 : x2 - x1) / (self.label.bounds.size.width - self.bounds.size.width);
     self.layer.timeOffset = _pausedTime;
 }
 @end
