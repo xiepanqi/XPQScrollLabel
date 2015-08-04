@@ -21,6 +21,10 @@
      *  @brief  YES-在向右滚动，NO-在向左滚动
      */
     BOOL _isRight;
+    /**
+     *  @brief  动画是否在运行
+     */
+    BOOL _isAnimationRun;
 }
 @property (nonatomic, weak) UILabel *label;
 /**
@@ -34,49 +38,6 @@
 @end
 
 @implementation XPQScrollLabel
-
-#pragma mark - ScrollLabel属性
--(void)setBounds:(CGRect)bounds {
-    super.bounds = bounds;
-    if (_label) {
-        [self calcLabelFrame];
-        [self startAnimation];
-    }
-}
-
--(void)setTime:(CGFloat)time {
-    _time = time;
-    if (time <= 0.01) {
-        self.type = XPQScrollLabelTypeBan;
-    }
-    else {
-        self.leftScrollAnimation.duration = time;
-        self.rightScrollAnimation.duration = time;
-        [self startAnimation];
-    }
-}
-
--(void)setType:(XPQScrollLabelType)type {
-    _type = type;
-    switch (type) {
-        case XPQScrollLabelTypeRepeat:
-            [self startAnimation];
-            break;
-            
-        case XPQScrollLabelTypeClick:
-            
-            break;
-            
-        case XPQScrollLabelTypeBan:
-            [self stopAnimation];
-            break;
-            
-        default:
-            _type = XPQScrollLabelTypeRepeat;
-            
-            break;
-    }
-}
 
 #pragma mark - 构造函数
 -(instancetype)init {
@@ -109,6 +70,49 @@
     _label = label;
     [self addSubview:label];
     self.clipsToBounds = YES;
+}
+
+#pragma mark - ScrollLabel属性
+-(void)setBounds:(CGRect)bounds {
+    super.bounds = bounds;
+    if (_label) {
+        [self calcLabelFrame];
+        [self startAnimation];
+    }
+}
+
+-(void)setTime:(CGFloat)time {
+    _time = time;
+    if (time <= 0.01) {
+        self.type = XPQScrollLabelTypeBan;
+    }
+    else {
+        self.leftScrollAnimation.duration = time;
+        self.rightScrollAnimation.duration = time;
+        [self startAnimation];
+    }
+}
+
+-(void)setType:(XPQScrollLabelType)type {
+    _type = type;
+    switch (type) {
+        case XPQScrollLabelTypeRepeat:
+            [self startAnimation];
+            break;
+            
+        case XPQScrollLabelTypeClick:
+            [self stopAnimation];
+            break;
+            
+        case XPQScrollLabelTypeBan:
+            [self stopAnimation];
+            break;
+            
+        default:
+            _type = XPQScrollLabelTypeRepeat;
+            [self startAnimation];
+            break;
+    }
 }
 
 #pragma mark -辅助函数
@@ -146,13 +150,14 @@
  *  @brief  启动动画
  */
 -(void)startAnimation {
-    if (self.time < 0.1
-        || self.type == XPQScrollLabelTypeBan
-        || self.leftScrollAnimation == nil
+    if (self.time < 0.1     // 时间过小
+        || self.type == XPQScrollLabelTypeBan // 不滚动类型
+        || self.leftScrollAnimation == nil      // 动画为nil
         || self.rightScrollAnimation == nil) {
         return;
     }
     
+    _isAnimationRun = YES;
     [self.label.layer addAnimation:_isRight ? self.rightScrollAnimation : self.leftScrollAnimation forKey:kAnimationKey];
 }
 
@@ -196,24 +201,44 @@
             if (_isRight) {
                 [self startAnimation];
             }
+            else {
+                _isAnimationRun = NO;
+            }
         }
+    }
+    else {
+        _isAnimationRun = NO;
     }
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    [self suspendAnimation];
+    if (self.type == XPQScrollLabelTypeRepeat) {
+        [self suspendAnimation];
+    }
+    else if (self.type == XPQScrollLabelTypeClick) {
+        if (!_isAnimationRun) {
+            [self startAnimation];
+        }
+        [self suspendAnimation];
+    }
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    [self continueAnimation];
+    if (self.type == XPQScrollLabelTypeRepeat
+        || self.type == XPQScrollLabelTypeClick) {
+        [self continueAnimation];
+    }
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    UITouch *touch = touches.anyObject;
-    CGFloat x1 = [touch locationInView:self].x;
-    CGFloat x2 = [touch previousLocationInView:self].x;
-    _pausedTime += (_isRight ? x1 - x2 : x2 - x1) / (self.label.bounds.size.width - self.bounds.size.width);
-    self.layer.timeOffset = _pausedTime;
+    if (self.type == XPQScrollLabelTypeRepeat
+        || self.type == XPQScrollLabelTypeClick) {
+        UITouch *touch = touches.anyObject;
+        CGFloat x1 = [touch locationInView:self].x;
+        CGFloat x2 = [touch previousLocationInView:self].x;
+        _pausedTime += (_isRight ? x1 - x2 : x2 - x1) / (self.label.bounds.size.width - self.bounds.size.width);
+        self.layer.timeOffset = _pausedTime;
+    }
 }
 @end
 
