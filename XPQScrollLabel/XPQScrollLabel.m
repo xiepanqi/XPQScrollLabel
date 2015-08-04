@@ -66,7 +66,7 @@
             break;
             
         case XPQScrollLabelTypeBan:
-            
+            [self stopAnimation];
             break;
             
         default:
@@ -144,7 +144,7 @@
  *  @brief  启动动画
  */
 -(void)startAnimation {
-    if (self.time < 0.1) {
+    if (self.time < 0.1 || self.type == XPQScrollLabelTypeBan) {
         return;
     }
     
@@ -184,7 +184,14 @@
 -(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
     if (flag) {
         _isRight = !_isRight;
-        [self startAnimation];
+        if (self.type == XPQScrollLabelTypeRepeat) {
+            [self startAnimation];
+        }
+        else if (self.type == XPQScrollLabelTypeClick) {
+            if (_isRight) {
+                [self startAnimation];
+            }
+        }
     }
 }
 
