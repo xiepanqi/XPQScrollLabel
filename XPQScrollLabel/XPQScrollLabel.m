@@ -12,12 +12,6 @@
 
 #define kAnimationKey       @"scrollAnimation"
 
-typedef enum : NSUInteger {
-    XPQScrollLabelAnimationStateStop,
-    XPQScrollLabelAnimationStateRun,
-    XPQScrollLabelAnimationStateSuspend,
-} XPQScrollLabelAnimationState;
-
 @interface XPQScrollLabel () {
     /**
      *  @brief  滚动动画暂停时时间
@@ -28,9 +22,9 @@ typedef enum : NSUInteger {
      */
     BOOL _isRight;
     /**
-     *  @brief  动画是运行状态
+     *  @brief  动画是否在运行
      */
-    XPQScrollLabelAnimationState _isAnimationState;
+    BOOL _isAnimationRun;
     /**
      *  @brief  动画启动时的图层时间
      */
@@ -78,7 +72,6 @@ typedef enum : NSUInteger {
     UILabel *label = [[UILabel alloc] init];
     label.textAlignment = NSTextAlignmentCenter;
     _label = label;
-    _isAnimationState = XPQScrollLabelAnimationStateStop;
     [self addSubview:label];
     self.clipsToBounds = YES;
 }
@@ -168,7 +161,7 @@ typedef enum : NSUInteger {
         return;
     }
     
-    _isAnimationState = XPQScrollLabelAnimationStateRun;
+    _isAnimationRun = YES;
     [self.label.layer addAnimation:_isRight ? self.rightScrollAnimation : self.leftScrollAnimation forKey:kAnimationKey];
     _startTime = [self.label.layer convertTime:CACurrentMediaTime() fromLayer:nil];
 }
@@ -178,7 +171,6 @@ typedef enum : NSUInteger {
  */
 -(void)stopAnimation {
     [self.label.layer removeAnimationForKey:kAnimationKey];
-    _isAnimationState = XPQScrollLabelAnimationStateStop;
 }
 
 /**
@@ -188,7 +180,6 @@ typedef enum : NSUInteger {
     _pausedTime = [self.label.layer convertTime:CACurrentMediaTime() fromLayer:nil];
     self.label.layer.speed = 0.0;
     self.label.layer.timeOffset = _pausedTime;
-    _isAnimationState = XPQScrollLabelAnimationStateSuspend;
 }
 
 -(void)moveAnimation:(CFTimeInterval)time {
@@ -211,7 +202,6 @@ typedef enum : NSUInteger {
     self.label.layer.beginTime = 0.0;
     CFTimeInterval timeSincePause = [self.label.layer convertTime:CACurrentMediaTime() fromLayer:nil] - _pausedTime;
     self.label.layer.beginTime = timeSincePause;
-    _isAnimationState = XPQScrollLabelAnimationStateRun;
 }
 
 /**
@@ -221,21 +211,19 @@ typedef enum : NSUInteger {
     if (flag) {
         _isRight = !_isRight;
         if (self.type == XPQScrollLabelTypeRepeat) {
-            if (_isAnimationState == XPQScrollLabelAnimationStateRun) {
-                [self startAnimation];
-            }
+            [self startAnimation];
         }
         else if (self.type == XPQScrollLabelTypeClick) {
-            if (_isRight && _isAnimationState == XPQScrollLabelAnimationStateRun) {
+            if (_isRight) {
                 [self startAnimation];
             }
             else {
-                _isAnimationState = XPQScrollLabelAnimationStateStop;
+                _isAnimationRun = NO;
             }
         }
     }
     else {
-        _isAnimationState = XPQScrollLabelAnimationStateStop;
+        _isAnimationRun = NO;
     }
 }
 
@@ -244,7 +232,7 @@ typedef enum : NSUInteger {
         [self suspendAnimation];
     }
     else if (self.type == XPQScrollLabelTypeClick) {
-        if (_isAnimationState == XPQScrollLabelAnimationStateStop) {
+        if (!_isAnimationRun) {
             [self startAnimation];
         }
         [self suspendAnimation];
