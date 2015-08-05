@@ -12,6 +12,12 @@
 
 #define kAnimationKey       @"scrollAnimation"
 
+typedef enum : NSUInteger {
+    XPQScrollLabelAnimationStateStop,
+    XPQScrollLabelAnimationStateRun,
+    XPQScrollLabelAnimationStateSuspend,
+} XPQScrollLabelAnimationState;
+
 @interface XPQScrollLabel () {
     /**
      *  @brief  滚动动画暂停时时间
@@ -22,9 +28,13 @@
      */
     BOOL _isRight;
     /**
-     *  @brief  动画是否在运行
+     *  @brief  动画是运行状态
      */
-    BOOL _isAnimationRun;
+    XPQScrollLabelAnimationState _isAnimationState;
+    /**
+     *  @brief  动画启动时的图层时间
+     */
+    CFTimeInterval _startTime;
 }
 @property (nonatomic, weak) UILabel *label;
 /**
@@ -68,6 +78,7 @@
     UILabel *label = [[UILabel alloc] init];
     label.textAlignment = NSTextAlignmentCenter;
     _label = label;
+    _isAnimationState = XPQScrollLabelAnimationStateStop;
     [self addSubview:label];
     self.clipsToBounds = YES;
 }
@@ -157,8 +168,9 @@
         return;
     }
     
-    _isAnimationRun = YES;
+    _isAnimationState = XPQScrollLabelAnimationStateRun;
     [self.label.layer addAnimation:_isRight ? self.rightScrollAnimation : self.leftScrollAnimation forKey:kAnimationKey];
+    _startTime = [self.label.layer convertTime:CACurrentMediaTime() fromLayer:nil];
 }
 
 /**
@@ -166,26 +178,40 @@
  */
 -(void)stopAnimation {
     [self.label.layer removeAnimationForKey:kAnimationKey];
+    _isAnimationState = XPQScrollLabelAnimationStateStop;
 }
 
 /**
  *  @brief  暂停动画
  */
 -(void)suspendAnimation {
-    _pausedTime = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil];
-    self.layer.speed = 0.0;
-    self.layer.timeOffset = _pausedTime;
+    _pausedTime = [self.label.layer convertTime:CACurrentMediaTime() fromLayer:nil];
+    self.label.layer.speed = 0.0;
+    self.label.layer.timeOffset = _pausedTime;
+    _isAnimationState = XPQScrollLabelAnimationStateSuspend;
+}
+
+-(void)moveAnimation:(CFTimeInterval)time {
+    _pausedTime += time;
+    if (_pausedTime < _startTime) {
+        _pausedTime = _startTime;
+    }
+    else if (_pausedTime > _startTime + self.time) {
+        _pausedTime = _startTime + self.time;
+    }
+    self.label.layer.timeOffset = _pausedTime;
 }
 
 /**
  *  @brief  继续动画
  */
 -(void)continueAnimation {
-    self.layer.speed = 1.0;
-    self.layer.timeOffset = 0.0;
-    self.layer.beginTime = 0.0;
-    CFTimeInterval timeSincePause = [self.layer convertTime:CACurrentMediaTime() fromLayer:nil] - _pausedTime;
-    self.layer.beginTime = timeSincePause;
+    self.label.layer.speed = 1.0;
+    self.label.layer.timeOffset = 0.0;
+    self.label.layer.beginTime = 0.0;
+    CFTimeInterval timeSincePause = [self.label.layer convertTime:CACurrentMediaTime() fromLayer:nil] - _pausedTime;
+    self.label.layer.beginTime = timeSincePause;
+    _isAnimationState = XPQScrollLabelAnimationStateRun;
 }
 
 /**
@@ -195,19 +221,21 @@
     if (flag) {
         _isRight = !_isRight;
         if (self.type == XPQScrollLabelTypeRepeat) {
-            [self startAnimation];
+            if (_isAnimationState == XPQScrollLabelAnimationStateRun) {
+                [self startAnimation];
+            }
         }
         else if (self.type == XPQScrollLabelTypeClick) {
-            if (_isRight) {
+            if (_isRight && _isAnimationState == XPQScrollLabelAnimationStateRun) {
                 [self startAnimation];
             }
             else {
-                _isAnimationRun = NO;
+                _isAnimationState = XPQScrollLabelAnimationStateStop;
             }
         }
     }
     else {
-        _isAnimationRun = NO;
+        _isAnimationState = XPQScrollLabelAnimationStateStop;
     }
 }
 
@@ -216,7 +244,7 @@
         [self suspendAnimation];
     }
     else if (self.type == XPQScrollLabelTypeClick) {
-        if (!_isAnimationRun) {
+        if (_isAnimationState == XPQScrollLabelAnimationStateStop) {
             [self startAnimation];
         }
         [self suspendAnimation];
@@ -236,8 +264,8 @@
         UITouch *touch = touches.anyObject;
         CGFloat x1 = [touch locationInView:self].x;
         CGFloat x2 = [touch previousLocationInView:self].x;
-        _pausedTime += (_isRight ? x1 - x2 : x2 - x1) / (self.label.bounds.size.width - self.bounds.size.width);
-        self.layer.timeOffset = _pausedTime;
+        CFTimeInterval moveTime = (_isRight ? x1 - x2 : x2 - x1) / (self.label.bounds.size.width - self.bounds.size.width) * self.time;
+        [self moveAnimation:moveTime];
     }
 }
 @end
