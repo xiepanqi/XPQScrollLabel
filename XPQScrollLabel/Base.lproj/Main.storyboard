@@ -50,7 +50,9 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
                     <connections>
-                        <outlet property="testLabel" destination="R4D-kN-mh8" id="HSy-oi-w9y"/>
+                        <outlet property="banView" destination="xvP-pu-ZGh" id="f7K-c3-gHE"/>
+                        <outlet property="clickView" destination="YWr-9D-WVT" id="Foe-cQ-Dmw"/>
+                        <outlet property="repeatView" destination="R4D-kN-mh8" id="amC-e5-Sjp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

@@ -10,8 +10,9 @@
 #import "XPQScrollLabel.h"
 
 @interface ViewController ()
-@property (weak, nonatomic) IBOutlet XPQScrollLabel *testLabel;
-
+@property (weak, nonatomic) IBOutlet XPQScrollLabel *repeatView;
+@property (weak, nonatomic) IBOutlet XPQScrollLabel *clickView;
+@property (weak, nonatomic) IBOutlet XPQScrollLabel *banView;
 @end
 
 @implementation ViewController
@@ -19,6 +20,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    self.repeatView.type = XPQScrollLabelTypeRepeat;
+    self.clickView.type = XPQScrollLabelTypeClick;
+    self.banView.type = XPQScrollLabelTypeBan;
 }
 
 - (void)didReceiveMemoryWarning {
