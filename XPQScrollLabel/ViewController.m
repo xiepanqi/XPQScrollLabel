@@ -25,11 +25,4 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-- (IBAction)clickTest:(id)sender {
-    [self.testLabel startAnimation];
-}
-
-- (IBAction)clickStop:(id)sender {
-    [self.testLabel stopAnimation];
-}
 @end
