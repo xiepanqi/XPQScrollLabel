@@ -125,9 +125,16 @@
  */
 -(void)calcLabelFrame {
     [self.label sizeToFit];
-    self.label.frame = CGRectMake(0, (self.frame.size.height - self.label.frame.size.height) / 2, self.label.frame.size.width + 10, self.label.frame.size.height);
-    self.leftScrollAnimation = [self creadAnimation:YES];
-    self.rightScrollAnimation = [self creadAnimation:NO];
+    if (self.bounds.size.width < self.label.bounds.size.width) {
+        self.label.frame = CGRectMake(0, (self.frame.size.height - self.label.frame.size.height) / 2, self.label.frame.size.width + 10, self.label.frame.size.height);
+        self.leftScrollAnimation = [self creadAnimation:YES];
+        self.rightScrollAnimation = [self creadAnimation:NO];
+    }
+    else {
+        self.label.frame = self.bounds;
+        self.leftScrollAnimation = nil;
+        self.rightScrollAnimation = nil;
+    }
 }
 
 #pragma mark - 动画
