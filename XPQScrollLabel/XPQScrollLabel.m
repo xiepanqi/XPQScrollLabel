@@ -153,6 +153,8 @@
     animation.toValue = isRight ? rightValue : leftValue;
     animation.duration = self.time;
     animation.timingFunction = [CAMediaTimingFunction functionWithName: kCAMediaTimingFunctionEaseInEaseOut];
+    animation.removedOnCompletion = NO;
+    animation.fillMode = kCAFillModeForwards;
     animation.delegate = self;
     return animation;
 }
