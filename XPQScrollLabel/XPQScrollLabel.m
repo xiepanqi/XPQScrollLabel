@@ -74,6 +74,8 @@
     _label = label;
     [self addSubview:label];
     self.clipsToBounds = YES;
+    
+    self.time = 1.0;
 }
 
 #pragma mark - ScrollLabel属性
